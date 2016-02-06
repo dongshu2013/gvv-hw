@@ -1,3 +1,6 @@
+*.csv
+*.json
+distance/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
