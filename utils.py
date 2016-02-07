@@ -2,6 +2,19 @@ from geopy.distance import vincenty
 from geopy.distance import great_circle
 import csv
 import json
+import numpy as np
+
+def haversine_np(probe, link_points):
+    delta = probe - link_points
+    d_lat = delta[:, 0]
+    d_lon = delta[:, 1]
+    lat1 = probe[0]
+    lat2 = link_points[:, 0]
+
+    tmp = np.sin(d_lat/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(d_lon/2.0)**2
+    ratio = 2 * np.arcsin(np.sqrt(tmp))
+
+    return 6371004 * ratio
 
 def read_probes(probe_file):
     probes = []
