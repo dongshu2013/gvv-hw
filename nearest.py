@@ -3,20 +3,22 @@
 
 import random
 import numpy as np
-from utils import read_probes, read_links, haversine_np
+from utils import read_probes, read_links, haversine_np, compute_dist
 from operator import itemgetter
 from sklearn.neighbors import NearestNeighbors as NN
 from itertools import izip
 from time import time
+import math
 import cPickle
+import geopy
 
 def flatten(links):
     link_points = []
-    belong = []
+    belong = {}
     for idx, link in enumerate(links):
         for link_point in link:
             link_points.append(link_point)
-            belong.append(idx)
+            belong[link_point] = idx
     return link_points, belong
 
 def nearest_probe_force(probe, link_points, n):
@@ -51,14 +53,7 @@ def read_data():
     link_file = 'links.csv'
     probes = read_probes(probe_file)
     links = read_links(link_file)
-    link_points, belong = flatten(links)
-    print len(link_points)
-    d = dict()
-    for link_point, bel in izip(link_points, belong):
-        d[link_point] = d.get(link_point, [])
-        d[link_point].append(bel)
-    print len(d)
-    return probes, d.keys(), d
+    return probes, links
 
 def evaluate(func, label=""):
     t1 = time()
@@ -77,35 +72,78 @@ def test():
 
     probes = np.deg2rad(probes)
     link_points = np.deg2rad(link_points)
-    
+
     knns_kd = evaluate(lambda: nearest_kdtree(probes, link_points, n=30, is_filter=True), "kdtree")
     knns_force = evaluate(lambda: nearest_force(probes, link_points, n=30), "brute force")
 
     for idx, (k1, k2) in enumerate(izip(knns_kd, knns_force)):
         diff = np.setdiff1d(k2, k1)
         if diff.size > 0:
-            print diff 
+            print diff
             print haversine_np(probes[idx], link_points[diff])
             # print haversine_np(probes[idx], link_points[k1])
             # print haversine_np(probes[idx], link_points[k2])
 
+def test_1():
+    probes, links = read_data()
+    print "Data loaded"
+    info = nearest_link_and_height(links, [2, 4, 5, 9], probes[0])
+    print "Probe: %s, Link: %s, Height: %f" % (probes[0], links[info[0]][0], info[1])
+
+def nearest_link_and_height(links, link_candidates, probe):
+    dists = {}
+    for idx in link_candidates:
+        #compute distance from probe to each link point
+        min_height = probe_to_link_dist(links[idx], probe)
+        dists[idx] = min_height
+
+    #select link from link candidates
+    return min(dists.items(), key=lambda x: x[1])
+
+def probe_to_link_dist2(link_points, probe):
+    dists = {}
+    for link_point in link_points:
+        dists[link_point] = compute_dist(link_point, probe)
+
+    heights = []
+    for i in range(len(link_points) - 1):
+        l1_to_l2 = compute_dist(link_points[i], link_points[i+1])
+        p_to_l1 = dists[link_points[i]]
+        p_to_l2 = dists[link_points[i+1]]
+        heights.append(compute_height(p_to_l1, p_to_l2, l1_to_l2))
+    return min(heights)
+
+def probe_to_link_dist(link_points, probe):
+    size = len(link_points)
+    l1_to_l2 = compute_dist(link_points[0], link_points[size - 1])
+    p_to_l1 = compute_dist(probe, link_points[0])
+    p_to_l2 = compute_dist(probe, link_points[size - 1])
+    return compute_height(p_to_l1, p_to_l2, l1_to_l2)
+
+def compute_height(p_to_l1, p_to_l2, l1_to_l2):
+    p = (p_to_l1 + p_to_l2 + l1_to_l2) / 2
+    s = math.sqrt(p * (p - p_to_l1) * (p - p_to_l2) * (p - l1_to_l2))
+    height = 2 * s / l1_to_l2
+    return height
+
 def main():
-    probes, link_points_, belong = read_data()
+    probes, links = read_data()
+    link_points, belong = flatten(links)
+
     print "%d probe points loaded" % len(probes)
     print "%d link points loaded" % len(link_points_)
 
     # probes = np.array(random.sample(probes, 10000))
     # print probes
 
-    probes = np.deg2rad(probes)
+    probes_rad = np.deg2rad(probes)
     link_points_ = np.array(link_points_)
     link_points = np.deg2rad(link_points_)
-    knns_kd = nearest_kdtree(probes, link_points, n=100, is_filter=False) 
-    # knns_kd = evaluate(lambda: nearest_kdtree(probes, link_points, n=100, is_filter=False), "kdtree")
+    knns_kd = nearest_kdtree(probes_rad, link_points, n=40, is_filter=False)
     link_candidates = [set([bel for lat, lon in link_points_[knns] for bel in belong[lat, lon]]) for knns in knns_kd]
     with open("link_candidates.pkl", "wb") as fout:
         cPickle.dump(link_candidates, fout, 2)
 
 if __name__ == "__main__":
-    main()
-    # test()
+    #main()
+    test_1()

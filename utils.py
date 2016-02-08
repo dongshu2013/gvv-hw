@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from geopy.distance import vincenty
 from geopy.distance import great_circle
 import csv
@@ -27,7 +30,7 @@ def read_probes(probe_file):
     return probes
 
 def read_links(link_file):
-    links = [] 
+    links = []
     with open(link_file, 'r') as l:
         datareader = csv.reader(l)
         for row in datareader:
@@ -39,8 +42,21 @@ def read_links(link_file):
             links.append(shapes)
     return links
 
-def compute_distance(src_loc, dst_loc):
+def compute_dist(src_loc, dst_loc):
     return vincenty(src_loc, dst_loc).meters
+
+def compute_dist_via_haversine(src_loc, dst_loc):
+    lat1 = src_loc[0]
+    lon1 = src_loc[1]
+    lat2 = dst_loc[0]
+    lon2 = dst_loc[1]
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a))
+    km = 6367 * c
+    return km
 
 if __name__ == '__main__':
     main()
