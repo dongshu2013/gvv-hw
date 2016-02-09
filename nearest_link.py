@@ -5,7 +5,7 @@ import math
 import cPickle
 import numpy as np
 import random
-from utils import read_data, compute_dist, haversine_np
+from utils import read_data, compute_dist, haversine_np, calc_link_dis
 from itertools import izip
 from operator import itemgetter
 
@@ -45,41 +45,6 @@ from operator import itemgetter
 #     s = math.sqrt(p * (p - p_to_l1) * (p - p_to_l2) * (p - l1_to_l2))
 #     height = 2 * s / l1_to_l2
 #     return height
-
-def calc_link_dis(base_side, side1, side2):
-    # print base_side.shape, side1.shape, side2.shape
-    ans = np.zeros_like(base_side, dtype=np.float)
-    mask = np.ones_like(base_side, dtype=np.bool)
-    
-    #point on the link
-    mask_on_line = np.logical_and(base_side == side1+side2, mask)
-    mask = np.logical_xor(mask, mask_on_line)
-    ans[mask_on_line] = 0
-    
-    #the adjaceny points on the link is overlapped
-    mask_point = np.logical_and(base_side < 1e-10, mask)
-    mask = np.logical_xor(mask, mask_point)
-    ans[mask_point] = side1[mask_point]
-
-    side1_sqr = side1 * side1
-    side2_sqr = side2 * side2
-    base_side_sqr = base_side * base_side
-    
-    #obtuse case 1
-    mask_obtuse1 = np.logical_and(side1_sqr > base_side_sqr + side2_sqr, mask)
-    mask = np.logical_xor(mask, mask_obtuse1)
-    ans[mask_obtuse1] = side2[mask_obtuse1]
-
-    #obtuse case 2
-    mask_obtuse2 = np.logical_and(side2_sqr > base_side_sqr + side1_sqr, mask)
-    mask = np.logical_xor(mask, mask_obtuse2)
-    ans[mask_obtuse2] = side1[mask_obtuse2]
-
-    #compute height by Heron's formula
-    half_p = (base_side[mask] + side1[mask] + side2[mask]) * 0.5 # half perimeter
-    area = np.sqrt(half_p * (half_p - side1[mask]) * (half_p - side2[mask]) * (half_p - base_side[mask]))
-    ans[mask] = 2 * area / base_side[mask]
-    return ans
 
 def probe_to_link_dist(link_points, probe):
     link_points_rad = np.deg2rad(link_points)
