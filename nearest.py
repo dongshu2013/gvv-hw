@@ -49,26 +49,29 @@ def evaluate(func, label=""):
 
 
 def test():
-    probes, link_points, belong = read_data()
+    probes, links = read_data()
+    link_points, belong = flatten_uniq(links)
     print "%d probe points loaded" % len(probes)
     print "%d link points loaded" % len(link_points)
 
     probes = np.array(random.sample(probes, 100))
     # print probes
-
-    probes = np.deg2rad(probes)
-    link_points = np.deg2rad(link_points)
+    link_points = np.array(link_points)
+    probes_rad = np.deg2rad(probes)
+    link_points_rad = np.deg2rad(link_points)
 
     knns_kd = evaluate(
-        lambda: nearest_kdtree(probes, link_points, n=30, is_filter=True), "kdtree")
+        lambda: nearest_kdtree(probes_rad, link_points_rad, n=30, is_filter=True), "kdtree")
     knns_force = evaluate(
-        lambda: nearest_force(probes, link_points, n=30), "brute force")
+        lambda: nearest_force(probes_rad, link_points_rad, n=30), "brute force")
 
     for idx, (k1, k2) in enumerate(izip(knns_kd, knns_force)):
         diff = np.setdiff1d(k2, k1)
         if diff.size > 0:
             print diff
-            print haversine_np(probes[idx], link_points[diff])
+            print probes[idx]
+            print link_points[diff]
+            print haversine_np(probes_rad[idx], link_points_rad[diff])
             # print haversine_np(probes[idx], link_points[k1])
             # print haversine_np(probes[idx], link_points[k2])
 
@@ -96,5 +99,5 @@ def main():
         cPickle.dump(link_candidates, fout, 2)
 
 if __name__ == "__main__":
-    # main()
-    test_1()
+    main()
+    # test()

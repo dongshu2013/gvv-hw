@@ -57,8 +57,8 @@ def flatten_uniq(links):
 
 
 def read_data():
-    probes = cPickle.load("data/probes.pkl")
-    links = cPickle.load("data/links.pkl")
+    probes = cPickle.load(open("data/probes.pkl", "rb"))
+    links = cPickle.load(open("data/links.pkl", "rb"))
     return probes, links
 
 
