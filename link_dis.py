@@ -1,3 +1,6 @@
+import math
+from utils import read_data, compute_dist
+
 def test_1():
     probes, links = read_data()
     print "Data loaded"

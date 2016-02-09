@@ -2,15 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import random
+import cPickle
 import numpy as np
-from utils import read_probes, read_links, haversine_np, compute_dist, read_data, flatten_uniq
+from utils import haversine_np, read_data, flatten_uniq
 from operator import itemgetter
 from sklearn.neighbors import NearestNeighbors as NN
 from itertools import izip
 from time import time
-import math
-import cPickle
-import geopy
 
 
 def nearest_probe_force(probe, link_points, n):
