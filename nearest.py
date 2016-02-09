@@ -95,7 +95,7 @@ def main():
         probes_rad, link_points_rad, n=100, is_filter=False)
     link_candidates = [set([bel for lat, lon in link_points_[knns]
                             for bel in belong[lat, lon]]) for knns in knns_kd]
-    with open("link_candidates.pkl", "wb") as fout:
+    with open("data/link_candidates.pkl", "wb") as fout:
         cPickle.dump(link_candidates, fout, 2)
 
 if __name__ == "__main__":

@@ -11,7 +11,14 @@ def haversine_np(probe, link_points):
     delta = probe - link_points
     d_lat = delta[:, 0]
     d_lon = delta[:, 1]
-    lat1 = probe[0]
+    if type(probe) != np.ndarray:
+        probe = np.array(probe)
+
+    if len(probe.shape) == 1:
+        lat1 = probe[0]
+    elif len(probe.shape) == 2:
+        lat1 = probe[:, 0]
+
     lat2 = link_points[:, 0]
 
     tmp = np.sin(d_lat/2.0)**2 + np.cos(lat1) * \
