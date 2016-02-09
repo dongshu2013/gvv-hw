@@ -4,8 +4,10 @@
 import math
 import cPickle
 import numpy as np
+import random
 from utils import read_data, compute_dist, haversine_np
 from itertools import izip
+from operator import itemgetter
 
 # def test_1():
 #     probes, links = read_data()
@@ -95,16 +97,55 @@ def probe_to_link_dist(link_points, probe):
 
 def main():
     link_candidates = cPickle.load(open("data/link_candidates.pkl", "rb"))
+    print len(link_candidates), " link candidates"
     probes, links = read_data()
+    print len(probes), " probes"
+    print len(links), " links"
     idx = 0
+    nearest_links = []
     for probe, candidates in izip(probes, link_candidates):
         link_dis = dict()
         for cand_id in candidates:
-            link_dis[cand_id] = probe_to_link_dist(links[cand_id], probe)
-        print link_dis
+            dis = probe_to_link_dist(links[cand_id], probe)
+            if dis < 100:
+                link_dis[cand_id] = dis
+        # print sorted(link_dis.items(), key=itemgetter(1))[:3]
+        if len(link_dis) == 0:
+            nearest_links.append(None)
+        else:
+            nearest_link = min(link_dis.items(), key=itemgetter(1))
+            nearest_links.append(nearest_link)
         idx += 1
-        if idx > 10:
-            break
+        if idx % 10000 == 0:
+            print idx
+    with open("data/nearest_link.pkl", "wb") as fout:
+        cPickle.dump(nearest_links, fout, 2)
+
+def test():
+    link_candidates = cPickle.load(open("data/link_candidates.pkl", "rb"))
+    probes, links = read_data()
+    d = dict()
+    indices = random.sample(range(len(probes)), 10000)
+    for idx in indices:
+    # for probe, candidates in izip(probes, link_candidates):
+        probe = probes[idx]
+        candidates = link_candidates[idx]
+        link_dis = dict()
+        for cand_id in candidates:
+            dis = probe_to_link_dist(links[cand_id], probe)
+            if dis < 100:
+                link_dis[cand_id] = dis
+        link_dis = link_dis.items()
+        if len(link_dis):
+            min_dis = min(link_dis, key=itemgetter(1))[1]
+            # print min_dis
+            link_dis = [x for x in link_dis if x[1] < min_dis + 10 and min_dis * 3 > x[1]]
+            l = len(link_dis)
+            if l == 4:
+                print link_dis
+            d[l] = d.get(l, 0) + 1
+    print d
 
 if __name__ == '__main__':
     main()
+    # test()
