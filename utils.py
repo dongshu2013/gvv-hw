@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from geopy.distance import vincenty
-from geopy.distance import great_circle
 import csv
-import json
+import cPickle
 import numpy as np
+from geopy.distance import vincenty
+
 
 def haversine_np(probe, link_points):
     delta = probe - link_points
@@ -14,10 +14,12 @@ def haversine_np(probe, link_points):
     lat1 = probe[0]
     lat2 = link_points[:, 0]
 
-    tmp = np.sin(d_lat/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(d_lon/2.0)**2
+    tmp = np.sin(d_lat/2.0)**2 + np.cos(lat1) * \
+        np.cos(lat2) * np.sin(d_lon/2.0)**2
     ratio = 2 * np.arcsin(np.sqrt(tmp))
 
     return 6371004 * ratio
+
 
 def read_probes(probe_file):
     probes = []
@@ -28,6 +30,7 @@ def read_probes(probe_file):
             point = (float(lat), float(lon))
             probes.append(point)
     return probes
+
 
 def read_links(link_file):
     links = []
@@ -42,8 +45,26 @@ def read_links(link_file):
             links.append(shapes)
     return links
 
+
+def flatten_uniq(links):
+    belong = dict()
+    for idx, link in enumerate(links):
+        for link_point in link:
+            belong[link_point] = belong.get(link_point, [])
+            belong[link_point].append(idx)
+
+    return belong.keys(), belong
+
+
+def read_data():
+    probes = cPickle.load("data/probes.pkl")
+    links = cPickle.load("data/links.pkl")
+    return probes, links
+
+
 def compute_dist(src_loc, dst_loc):
     return vincenty(src_loc, dst_loc).meters
+
 
 def compute_dist_via_haversine(src_loc, dst_loc):
     lat1 = src_loc[0]
