@@ -5,6 +5,7 @@ import csv
 import cPickle
 import numpy as np
 from geopy.distance import vincenty
+from datetime import datetime
 
 def calc_link_dis(base_side, side1, side2):
     # print base_side.shape, side1.shape, side2.shape
@@ -100,6 +101,13 @@ def read_link_ids(link_file):
 
 def read_link_lengths(link_file):
     return [float(x) for x in read_csv(link_file, 3)]
+
+def read_probe_ids(probe_file):
+    return read_csv(probe_file, 0)
+
+def read_probe_times(probe_file):
+    FMT_STR = "%m/%d/%Y %I:%M:%S %p"
+    return [datetime.strptime(x, FMT_STR) for x in read_csv(probe_file, 1)]
 
 def flatten_uniq(links):
     belong = dict()
