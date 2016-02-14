@@ -11,12 +11,12 @@ def calc_link_dis(base_side, side1, side2):
     # print base_side.shape, side1.shape, side2.shape
     ans = np.zeros_like(base_side, dtype=np.float)
     mask = np.ones_like(base_side, dtype=np.bool)
-    
+
     #point on the link
     mask_on_line = np.logical_and(base_side == side1+side2, mask)
     mask = np.logical_xor(mask, mask_on_line)
     ans[mask_on_line] = 0
-    
+
     #the adjaceny points on the link is overlapped
     mask_point = np.logical_and(base_side < 1e-10, mask)
     mask = np.logical_xor(mask, mask_point)
@@ -25,7 +25,7 @@ def calc_link_dis(base_side, side1, side2):
     side1_sqr = side1 * side1
     side2_sqr = side2 * side2
     base_side_sqr = base_side * base_side
-    
+
     #obtuse case 1
     mask_obtuse1 = np.logical_and(side1_sqr > base_side_sqr + side2_sqr, mask)
     mask = np.logical_xor(mask, mask_obtuse1)
@@ -61,7 +61,6 @@ def haversine_np(probe, link_points):
     ratio = 2 * np.arcsin(np.sqrt(tmp))
 
     return 6371004 * ratio
-
 
 def read_probes(probe_file):
     probes = []
@@ -118,16 +117,13 @@ def flatten_uniq(links):
 
     return belong.keys(), belong
 
-
 def read_data():
     probes = cPickle.load(open("data/probes.pkl", "rb"))
     links = cPickle.load(open("data/links.pkl", "rb"))
     return probes, links
 
-
 def compute_dist(src_loc, dst_loc):
     return vincenty(src_loc, dst_loc).meters
-
 
 def compute_dist_via_haversine(src_loc, dst_loc):
     lat1 = src_loc[0]
