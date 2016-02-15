@@ -48,12 +48,12 @@ def read_raw_data():
 
 def save_data():
     matched_points, links = read_raw_data();
-    with open('matched_points.pkl', 'wb+') as fout:
+    with open('../data/matched_points.pkl', 'wb+') as fout:
         cPickle.dump(matched_points, fout, 2)
-    with open('links.pkl', 'wb+') as fout:
+    with open('../data/links.pkl', 'wb+') as fout:
         cPickle.dump(links, fout, 2)
 
 def load_data():
-    matched_points = cPickle.load(open('matched_points.pkl', 'rb'))
-    links = cPickle.load(open('links.pkl', 'rb'))
+    matched_points = cPickle.load(open('../data/matched_points.pkl', 'rb'))
+    links = cPickle.load(open('../data/links.pkl', 'rb'))
     return matched_points, links

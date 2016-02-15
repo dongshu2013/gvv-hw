@@ -31,25 +31,27 @@ def process(matched_points, links):
     return link_to_slopes
 
 
-def save_link_to_slopes(link_to_slopes):
+def save_link_to_slopes(link_to_slopes, links):
     with open('../data/slopes.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         for pvid, slopes in link_to_slopes.iteritems():
             link = []
             link.append(pvid)
+            slopes = sorted(slopes, key=lambda x:x[0])
             link.append('|'.join(['/'.join(map(str, slope)) for slope in slopes]))
+            link.append('|'.join(['/'.join(map(str, slope)) for slope in links[pvid][1]]))
             writer.writerow(link)
 
 
 def main():
-    if not os.path.exists('./matched_points.pkl') or not os.path.exists('./links.pkl'):
+    if not os.path.exists('../data/matched_points.pkl') or not os.path.exists('../data/links.pkl'):
         print "Saving Data"
         save_data()
     print "Loading Data"
     matched_points, links = load_data()
     print "Data Loaded"
     link_to_slopes = process(matched_points, links)
-    save_link_to_slopes(link_to_slopes)
+    save_link_to_slopes(link_to_slopes, links)
 
 
 if __name__ == "__main__":
