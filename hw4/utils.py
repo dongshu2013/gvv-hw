@@ -12,8 +12,9 @@ def read_matched_points(matched_points_file):
         for row in datareader:
             altitude = row[5]
             dist_from_ref = row[10]
+            dist_from_link = row[11]
             linkPVID = row[8]
-            matched_point = (linkPVID, float(altitude), float(dist_from_ref))
+            matched_point = (linkPVID, float(altitude), float(dist_from_ref), float(dist_from_link))
             matched_points.append(matched_point)
     return matched_points
 
@@ -37,6 +38,7 @@ def read_links(link_file):
             for slope in slope_info.split('|'):
                 if slope:
                     dist, degree = slope.split('/')
+                    print degree
                     slopes.append((float(dist), float(degree)))
             links[linkPVID].append(slopes)
     return links
