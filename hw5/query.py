@@ -3,6 +3,8 @@
 import urllib2
 import sys
 import logging
+import os
+import shutil
 
 
 BASE_URL = 'http://dev.virtualearth.net/REST/v1/Imagery/Map'
@@ -27,22 +29,30 @@ def url(center):
 def query(url, output):
     logging.info("Url:" + url)
     image = urllib2.urlopen(url)
-    with open(output,'wb') as o:
+    with open(output,'wb+') as o:
         o.write(image.read())
 
 
 def process(centers):
     for i in range(len(centers)):
-        query(url(centers[i]), str(i) + '.jpeg')
+        query(url(centers[i]), './tmp/' + str(i) + '.jpeg')
+
+
+def create_temp_dir():
+    if os.path.exists('./tmp'):
+        shutil.rmtree('./tmp')
+    os.mkdir('./tmp')
 
 
 def test():
+    create_temp_dir()
     centers = [(47.678559869527817, -122.13099449872971),
                (47.45223343, -122.2323354)]
     process(centers)
 
 
 def main():
+    create_temp_dir()
     if len(sys.argv) != 2:
         print "Wrong number of arguments, exiting ..."
         sys.exit(1)
