@@ -18,6 +18,7 @@ def cpt_slope(match_point, link):
         diff_alt = point_alt - ref_alt
         degree = math.degrees(math.atan(diff_alt/dist))
         #set threshold to filter abnormal points
+        # return dist, degree
         if degree < 8 and degree > -9:
             return dist, degree
         else:
@@ -30,8 +31,9 @@ def process(matched_points, links, dist_from_link_threshold = 50):
     for match_point in matched_points:
         linkPVID = match_point[0]
         dist_from_link = match_point[3]
-#        if dist_from_link > dist_from_link_threshold:
-#            continue
+        # print dist_from_link 
+        if dist_from_link > dist_from_link_threshold:
+            continue
         link = links[linkPVID]
         dist, degree = cpt_slope(match_point, link)
         if dist != 0 and degree:
@@ -61,7 +63,7 @@ def main():
     print "Loading Data"
     matched_points, links = load_data()
     print "Data Loaded"
-    link_to_slopes = process(matched_points, links)
+    link_to_slopes = process(matched_points, links, 10)
     save_link_to_slopes(link_to_slopes, links)
 
 
