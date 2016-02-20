@@ -5,6 +5,7 @@ import sys
 import logging
 import os
 import shutil
+from centers import get_centers
 
 
 BASE_URL = 'http://dev.virtualearth.net/REST/v1/Imagery/Map'
@@ -54,10 +55,14 @@ def test():
 def main():
     create_temp_dir()
     if len(sys.argv) != 2:
-        print "Wrong number of arguments, exiting ..."
+        logging.info("Wrong number of arguments, exiting ...")
         sys.exit(1)
+    bound = map(float, sys.argv[1].split(','))
+    centers = get_centers(*bound)
+    logging.info('%d centers generated' % len(centers))
+    process(centers)
 
 
 if __name__ == '__main__':
-    #main()
-    test()
+    main()
+    #test()
