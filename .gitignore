@@ -1,4 +1,5 @@
 *.csv
+hw5/tmp
 *.json
 distance/
 .DS_Store

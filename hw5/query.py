@@ -5,7 +5,9 @@ import sys
 import logging
 import os
 import shutil
+import cv2
 from centers import get_centers
+from combine import combine_images
 
 
 BASE_URL = 'http://dev.virtualearth.net/REST/v1/Imagery/Map'
@@ -24,7 +26,7 @@ root.addHandler(ch)
 
 def url(center):
     return BASE_URL + '/Aerial/' + ','.join(map(str, center)) + \
-        '/20/?mapSize=512,512&key=' + KEY
+        '/20/?mapSize=512,572&key=' + KEY
 
 
 def query(url, output):
@@ -54,13 +56,14 @@ def test():
 
 def main():
     create_temp_dir()
-    if len(sys.argv) != 2:
-        logging.info("Wrong number of arguments, exiting ...")
+    if len(sys.argv) != 6:
+        print "usage: python %s lat1 lon1 lat2 lon2 save_name.jpg" % sys.argv[0]
         sys.exit(1)
-    bound = map(float, sys.argv[1].split(','))
-    centers = get_centers(*bound)
+    centers, size = get_centers(*map(float, sys.argv[1:-1]))
     logging.info('%d centers generated' % len(centers))
     process(centers)
+    img = combine_images(size)
+    cv2.imwrite(sys.argv[-1], img)
 
 
 if __name__ == '__main__':
