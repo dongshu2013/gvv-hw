@@ -5,7 +5,7 @@ import sys
 import logging
 
 
-BASE_URL = 'http://dev.virtualearth.net/REST/v1/Imagery/Map/'
+BASE_URL = 'http://dev.virtualearth.net/REST/v1/Imagery/Map'
 KEY = 'AlbGt7PP-W5qWxfB12esT9wOPXLIBfg5uQzOCySOd-DkGo1hw6JAoraf-y2_crxU'
 
 
@@ -19,10 +19,9 @@ ch.setFormatter(formatter)
 root.addHandler(ch)
 
 
-def url(map_area):
-    return BASE_URL + 'Aerial/21' + '/?' + \
-        'mapArea=' + ','.join(map_area) + \
-        '&key=' + KEY
+def url(center):
+    return BASE_URL + '/Aerial/' + ','.join(map(str, center)) + \
+        '/20/?mapSize=512,512&key=' + KEY
 
 
 def query(url, output):
@@ -32,13 +31,19 @@ def query(url, output):
         o.write(image.read())
 
 
+def test():
+    center = (47.678559869527817, -122.13099449872971)
+    query(url(center), 'test.jpeg')
+
+
 def main():
     if len(sys.argv) != 2:
         print "Wrong number of arguments, exiting ..."
         sys.exit(1)
-    map_area = tuple(sys.argv[1].split(','))
-    query(url(map_area), sys.argv[1] + '.jpeg')
+    center = tuple(sys.argv[1].split(','))
+    query(url(center), sys.argv[1] + '.jpeg')
 
 
 if __name__ == '__main__':
-    main()
+    #main()
+    test()

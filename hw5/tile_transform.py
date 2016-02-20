@@ -13,6 +13,8 @@ def clip(n, min_value, max_value):
 
 
 def pix_to_latlon(px, py, level=20):
+    px = float(px)
+    py = float(py)
     msize = 256 << level
     x = (clip(px, 0, msize - 1) / msize) - 0.5;
     y = 0.5 - (clip(py, 0, msize - 1) / msize);
@@ -42,8 +44,8 @@ def test():
 
     print '******************************'
 
-    print (43168150, 93745005)
-    print pix_to_latlon(43168150.095022224, 93745004.8788148)
+    print (43168150, 93745004)
+    print pix_to_latlon(43168150, 93745004)
 
 
 if __name__ == '__main__':
