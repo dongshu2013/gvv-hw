@@ -12,6 +12,7 @@ from combine import combine_images
 
 BASE_URL = 'http://dev.virtualearth.net/REST/v1/Imagery/Map'
 KEY = 'AlbGt7PP-W5qWxfB12esT9wOPXLIBfg5uQzOCySOd-DkGo1hw6JAoraf-y2_crxU'
+#KEY = 'Aofb3blsrt2vPjZgzj2JoCjyv43a9OsESy7B5-40etee9LSt_0oCXjY62OfUL7eZ'
 
 
 root = logging.getLogger()
