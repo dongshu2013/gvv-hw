@@ -58,7 +58,7 @@ def test():
 def main():
     create_temp_dir()
     if len(sys.argv) != 6:
-        print "usage: python %s lat1 lon1 lat2 lon2 save_name.jpg" % sys.argv[0]
+        print "usage: python %s lat1 lon1 lat2 lon2 save_image_name" % sys.argv[0]
         sys.exit(1)
     centers, size = get_centers(*map(float, sys.argv[1:-1]))
     logging.info('%d centers generated' % len(centers))

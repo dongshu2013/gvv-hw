@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 from glob import glob
 
 def combine_images(size):
@@ -18,8 +17,6 @@ def combine_images(size):
 
 def main():
     img = combine_images((3, 3))
-    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    plt.show()
     cv2.imwrite("result.jpg", img)
 
 if __name__ == "__main__":
