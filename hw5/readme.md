@@ -1,5 +1,11 @@
 # Geospatial Assigment5: Satellite/Aerial Image Retrieval
 
+<p align=center>
+    Qinglin Li,  
+    Weiyi Zeng, 
+    Shu Dong
+</p>
+
 First, make sure you have `Python2`, `numpy` and the Python interface of `OpenCV` installed.
 
 Then, run `query.py` to get the aerial image within the bounding box.
