@@ -2,6 +2,7 @@
 hw5/tmp
 *.json
 distance/
+hw6/data
 .DS_Store
 # Byte-compiled / optimized / DLL files
 __pycache__/
