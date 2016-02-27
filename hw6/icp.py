@@ -13,7 +13,7 @@ def latlonelev_to_xyz(points):
     elev = points[:, 2]
     x = EARTH_R * np.cos(lat_rad) * np.cos(lon_rad)
     y = EARTH_R * np.cos(lat_rad) * np.sin(lon_rad)
-    z = EARTH_R * np.sin(lat_rad) + elev;
+    z = EARTH_R * np.sin(lat_rad) + elev
     return np.vstack((x, y, z)).T
 
 def find_nearest(nn, points2_prime, M):
@@ -21,15 +21,20 @@ def find_nearest(nn, points2_prime, M):
     return dist, idx[:, 0]
         
 #M is a 4*3 Matrix, transposed since data points are in row vectors
-def icp(points1, points2_prime, M_init):
+def icp(points1, points2_prime, M_init, threshold=0.021):
     M = M_init
     nn = NN(n_neighbors=1).fit(points1)
     for i in xrange(1000):
         dist, idx = find_nearest(nn, points2_prime, M)
-        print "Iteration %d, average distance %f" % (i, np.mean(dist))
+        avg_dist = np.mean(dist)
+        print "Iteration %d, average distance %f" % (i, avg_dist)
+        if avg_dist < threshold:
+            break
         M = np.dot(np.linalg.pinv(points2_prime), points1[idx, :])
     dist, idx = find_nearest(nn, points2_prime, M)
     print "Final result, average distance %f" % (np.mean(dist))
+    print "M ", M
+    print "M transpose", M.T
 
 def main():
     p1 = np.genfromtxt("data/pointcloud1.fuse")
