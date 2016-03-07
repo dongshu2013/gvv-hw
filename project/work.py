@@ -98,14 +98,87 @@ def find_yellow(img_wl, basename, model_left, model_mid, model_right, y_leftline
     # plt.show()
     cv2.imwrite("labeled_image/" + basename, img_wl)
 
+def get_train_samples():
+    samples = []
+    for file_path in glob("train/*"):
+        img_train = cv2.cvtColor(cv2.imread(file_path), cv2.COLOR_BGR2HSV)
+        samples.append(img_train)
+    return samples
+
+class HistSeg:
+    def __init__(self, channel1, channel2):
+        self.channel1 = channel1
+        self.channel2 = channel2
+        self.hist = None
+
+    def train(self, samples):
+        hist = np.zeros((256, 256), dtype=np.float)
+        cnt = 0
+        for img in samples:
+            tmp = 1.0 / img.size
+            for i in xrange(img.shape[0]):
+                for j in xrange(img.shape[1]):
+                    chs = img[i, j]
+                    ch1, ch2 = chs[self.channel1], chs[self.channel2]
+                    hist[ch1, ch2] += tmp
+        self.hist = hist / len(samples)
+
+    def test(self, img, threshold=1e-4):
+        chs = cv2.split(img)
+        ch1, ch2 = chs[self.channel1], chs[self.channel2]
+        return self.hist[ch1, ch2] > threshold
+
+def find_yellow1(img, img_wl, basename, model_left, model_mid, model_right, y_leftline, y_midline, y_rightline):
+    img = img[1050:1450]
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    seg = HistSeg(0, 1)
+    samples = get_train_samples()
+    seg.train(samples)
+
+    mask = seg.test(img_hsv, 0).astype(np.uint8) * 255
+    img_label, _ = connected_component(mask)
+    y = np.bincount(img_label[:, 1500:].ravel())
+    ii = np.nonzero(y)[0]
+    label_count = zip(ii, y[ii])
+    for idx in xrange(len(label_count)):
+        l, c = label_count[idx]
+        if not np.count_nonzero(mask[img_label == l]):
+            label_count[idx] = (l, 0)
+    label_count.sort(key=itemgetter(1), reverse=True)
+    mask[img_label != label_count[0][0]] = 0
+    # plt.subplot(211)
+    # plt.imshow(mask, cmap="gray")
+    # plt.subplot(212)
+    # plt.imshow(cv2.Canny(mask, 100, 200), cmap="gray")
+    # plt.show()
+    for x in xrange(mask.shape[0]):
+        line = mask[x, :]
+        y_max = np.max(np.where(line > 0))
+        mask[x, 0:y_max] = 0
+    # plt.imshow(mask, cmap="gray")
+    # plt.show()
+    x_yellow, y_yellow = np.where(mask > 0)
+    right_yellow_model = LinRegr().fit(x_yellow.reshape((-1, 1)), y_yellow)
+    for idx, x in enumerate(xrange(1050, 1450)):
+        y_left  = y_leftline[idx]
+        y_mid   = y_midline[idx]
+        y_right = y_rightline[idx]
+        y_yellow = right_yellow_model.predict([[idx]])
+        img_wl[x, y_right : y_yellow, [2, 0]] = 255
+    # plt.imshow(img_wl)
+    # plt.show()
+    cv2.imwrite("road mask/" + basename, img_wl)
+
 def work(img_path):
     img = cv2.imread(img_path)
     model_left, model_mid, model_right, y_leftline, y_midline, y_rightline, img_white_labeled = find_white(img, os.path.basename(img_path))
-    find_yellow(img_white_labeled, os.path.basename(img_path), model_left, model_mid, model_right, y_leftline, y_midline, y_rightline)
+    # find_yellow(img, img_white_labeled, os.path.basename(img_path), model_left, model_mid, model_right, y_leftline, y_midline, y_rightline)
+    find_yellow1(img, img_white_labeled, os.path.basename(img_path), model_left, model_mid, model_right, y_leftline, y_midline, y_rightline)
 
 def main():
-    for img_name in glob("../cube/*.jpg"):
+    for img_name in glob("/Users/lostleaf/Dropbox/Winter2016/geo/cube/*.jpg"):
         work(img_name)
-    # work("../cube/7407.jpg")
+    # work("/Users/lostleaf/Dropbox/Winter2016/geo/cube/7407.jpg")
 if __name__ == "__main__":
     main()
